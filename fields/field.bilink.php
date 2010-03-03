@@ -315,6 +315,11 @@
 		
 		public function displayPublishPanel(&$wrapper, $data = null, $error = null, $prefix = null, $postfix = null, $entry_id = null) {
 			$handle = $this->get('element_name'); $entry_ids = array();
+			$sectionManager = new SectionManager($this->_engine);
+			$section = $sectionManager->fetch($this->get('linked_section_id'));
+			$fieldManager = new FieldManager($this->_engine);
+			$linked = $fieldManager->fetch($this->get('linked_field_id'));
+
 			
 			if (!is_array($data['linked_entry_id']) and !is_null($data['linked_entry_id'])) {
 				$entry_ids = array($data['linked_entry_id']);
@@ -331,12 +336,20 @@
 			
 			$label = Widget::Label($this->get('label'));
 			$select = Widget::Select($fieldname, $options);
-			
+			$link = Widget::Anchor(
+				$section->get('name'). __(' →'), 
+				sprintf('%s/symphony/publish/%s/?filter=%s:%s', URL,
+					$section->get('handle'),
+					$linked->get('element_name'),
+					$entry_id)
+			);
+														);
 			if ($this->get('allow_multiple') == 'yes') {
 				$select->setAttribute('multiple', 'multiple');
 			}
 			
 			$label->appendChild($select);
+			$label->appendChild($link);
 			
 			if ($error != null) {
 				$label = Widget::wrapFormElementWithError($label, $error);
